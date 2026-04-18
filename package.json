@@ -1,0 +1,21 @@
+// package.json for real React build via wp-scripts
+{
+  "name": "klarhed",
+  "version": "1.0.0",
+  "description": "KLARHED — Lederskabsforløb (WordPress plugin, frontend React app)",
+  "private": true,
+  "scripts": {
+    "start": "wp-scripts start src/index.jsx --output-path=assets/build",
+    "build": "wp-scripts build src/index.jsx --output-path=assets/build",
+    "lint:js": "wp-scripts lint-js src",
+    "format": "wp-scripts format src"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.0.0"
+  },
+  "dependencies": {
+    "@wordpress/element": "^6.0.0",
+    "@wordpress/api-fetch": "^7.0.0",
+    "@wordpress/i18n": "^5.0.0"
+  }
+}
