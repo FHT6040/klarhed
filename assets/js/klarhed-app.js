@@ -15,6 +15,7 @@
   var SAVE_DEBOUNCE = 1200;
   var state = loadLocal();
   var saveTimer = null;
+  var expandedBlocks = {};
 
   // ---------- state ----------
   function loadLocal() {
@@ -238,6 +239,19 @@
         (ch.lessons || []).map(function (les, i) { return LessonCard(ch, i, les); })
       ),
 
+      (function () {
+        var allDone = (ch.lessons || []).length > 0 &&
+          (ch.lessons || []).every(function (_, li) { return !!state.progress[ch.slug + ':' + li]; });
+        if (!allDone) return null;
+        return h('div', { class: 'kh-chapter-done' }, [
+          h('p', { class: 'kh-chapter-done-icon', text: '\u2736' }),
+          h('h2', { class: 'kh-chapter-done-title', text: 'Kapitel gennemf\u00f8rt' }),
+          h('p', { class: 'kh-chapter-done-sub', text: 'Godt arbejde. Du kan altid vende tilbage og tilpasse dine svar.' }),
+          idx < COURSE.chapters.length - 1
+            ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Forts\u00e6t til n\u00e6ste kapitel \u2192'])
+            : null
+        ]);
+      })(),
       h('div', { class: 'kh-chapter-nav' }, [
         idx > 0 ? h('button', { class: 'kh-btn kh-btn--ghost', onclick: function () { go({ view: 'chapter', idx: idx - 1 }); } }, ['← Forrige kapitel']) : h('span'),
         idx < COURSE.chapters.length - 1 ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Næste kapitel →']) : null
@@ -285,10 +299,18 @@
             les.author ? h('footer', { class: 'kh-quote-author', text: '— ' + les.author }) : null
           ])
         ]); break;
-      case 'theory':
+      case 'theory': {
+        var thText = les.body || '';
+        var thExp = !!expandedBlocks[pKey];
+        var thMore = thText.length > 320;
+        var thDisplay = (!thMore || thExp) ? thText : thText.slice(0, 280).replace(/\s+$/, '') + '\u2026';
         body = h('div', { class: 'kh-lesson-body' }, [
-          h('div', { class: 'kh-prose', text: les.body || '' })
+          h('div', { class: 'kh-prose kh-prose--theory', text: thDisplay }),
+          thMore ? h('button', { class: 'kh-expand-btn', onclick: (function (k, e) {
+            return function () { expandedBlocks[k] = !e; renderAll(); };
+          })(pKey, thExp) }, [thExp ? '\u2191 Vis mindre' : 'L\u00e6s videre \u2192']) : null
         ]); break;
+      }
       case 'pillars':
         body = h('div', { class: 'kh-lesson-body' }, [
           h('div', { class: 'kh-pillars' },
@@ -415,21 +437,42 @@
           h('p', { class: 'kh-muted', text: 'Skriv dit personlige ledelsesmanifest — de principper og forpligtelser, du tager med dig herfra.' }),
           textarea(ch.slug + ':manifest:' + i, 10)
         ]); break;
+      case 'read': {
+        var readText = les.body || '';
+        var readExp = !!expandedBlocks[pKey];
+        var readBreak = readText.indexOf('\n', 200);
+        var readCut = readBreak > 0 && readBreak < 500 ? readBreak : 280;
+        var readMore = readText.length > readCut + 50;
+        var readDisplay = (!readMore || readExp) ? readText : readText.slice(0, readCut).replace(/\s+$/, '') + '\u2026';
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('div', { class: 'kh-prose', text: readDisplay }),
+          readMore ? h('button', { class: 'kh-expand-btn', onclick: (function (k, e) {
+            return function () { expandedBlocks[k] = !e; renderAll(); };
+          })(pKey, readExp) }, [readExp ? '\u2191 Vis mindre' : 'L\u00e6s videre \u2192']) : null
+        ]); break;
+      }
       default:
         body = h('div', { class: 'kh-lesson-body' }, [
           h('div', { class: 'kh-prose', text: les.body || '' })
         ]);
     }
 
-    return h('article', { class: 'kh-lesson' + (done ? ' is-done' : '') }, [
+    return h('article', { class: 'kh-lesson kh-lesson--' + kind + (done ? ' is-done' : '') }, [
       h('header', { class: 'kh-lesson-head' }, [
         h('span', { class: 'kh-lesson-kind', text: kindLabel(kind) }),
         h('h3', { class: 'kh-lesson-title', text: les.title || '' }),
         h('button', {
           class: 'kh-check' + (done ? ' is-done' : ''),
           onclick: function () {
-            state.progress[pKey] = !done;
+            var becomingDone = !done;
+            state.progress[pKey] = becomingDone;
             scheduleSync(); renderAll();
+            if (becomingDone) {
+              setTimeout(function () {
+                var all = document.querySelectorAll('#klarhed-root .kh-lesson');
+                if (all[i + 1]) { all[i + 1].scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+              }, 60);
+            }
           }
         }, [done ? '✓ Gennemført' : 'Markér som gennemført'])
       ]),
