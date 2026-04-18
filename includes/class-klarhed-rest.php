@@ -32,6 +32,12 @@ class Klarhed_REST {
     public function register() {
         $ns = 'klarhed/v1';
 
+        register_rest_route( $ns, '/course', [
+            'methods'             => 'GET',
+            'callback'            => fn() => rest_ensure_response( Klarhed_Course::get_data() ),
+            'permission_callback' => '__return_true',
+        ] );
+
         register_rest_route( $ns, '/state', [
             [ 'methods' => 'GET',  'callback' => [ $this, 'get_state' ],  'permission_callback' => [ $this, 'auth' ] ],
             [ 'methods' => 'POST', 'callback' => [ $this, 'save_state' ], 'permission_callback' => [ $this, 'auth' ] ],

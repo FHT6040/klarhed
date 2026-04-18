@@ -38,6 +38,18 @@
     }, SAVE_DEBOUNCE);
   }
 
+  function loadCourse(done) {
+    if (!BOOT.restUrl || (COURSE.chapters && COURSE.chapters.length)) return done();
+    fetch(BOOT.restUrl + 'course')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && Array.isArray(d.chapters) && d.chapters.length) {
+          COURSE = d;
+        }
+        done();
+      }).catch(done);
+  }
+
   function loadRemote(done) {
     if (!BOOT.loggedIn || !BOOT.restUrl) return done();
     fetch(BOOT.restUrl + 'state', {
@@ -514,7 +526,7 @@
   // ---------- boot ----------
   function boot() {
     if (!document.querySelector('#klarhed-root')) return;
-    loadRemote(function () { renderAll(); });
+    loadCourse(function () { loadRemote(function () { renderAll(); }); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
