@@ -43,7 +43,7 @@ class Klarhed_Emails {
         $wrap = $this->wrap( $body_html );
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            sprintf( 'From: %s <%s>', $opts['from_name'], get_option( 'admin_email' ) ),
+            sprintf( 'From: %s <%s>', sanitize_text_field( $opts['from_name'] ), sanitize_email( get_option( 'admin_email' ) ) ),
         ];
         return wp_mail( $to, $subject, $wrap, $headers );
     }
@@ -83,7 +83,7 @@ class Klarhed_Emails {
 
     public function send_chapter_nudge( $user_id, $chapter_slug, $attempt_id ) {
         $u = get_userdata( $user_id ); if ( ! $u ) return;
-        $chapter = Klarhed_Course::find_chapter( $chapter_slug );
+        $chapter = Klarhed_Course::get_chapter( $chapter_slug );
         if ( ! $chapter ) return;
         $body = sprintf(
             '<h2 style="font-family:Georgia,serif;font-weight:normal;margin:0 0 14px">%s %s</h2>'

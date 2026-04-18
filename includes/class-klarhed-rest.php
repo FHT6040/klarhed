@@ -182,8 +182,11 @@ class Klarhed_REST {
     }
 
     public function admin_toggle_coach( WP_REST_Request $r ) {
-        $user_id = (int) $r->get_param( 'user_id' );
-        $allow   = (bool) $r->get_param( 'allow' );
+        $user_id = absint( $r->get_param( 'user_id' ) );
+        if ( ! $user_id || ! get_userdata( $user_id ) ) {
+            return new WP_Error( 'invalid-user', 'User not found', [ 'status' => 404 ] );
+        }
+        $allow = (bool) $r->get_param( 'allow' );
         Klarhed_Shares::set_admin_allowed( $user_id, $allow );
         return rest_ensure_response( [ 'ok' => true, 'user_id' => $user_id, 'allow' => $allow ] );
     }

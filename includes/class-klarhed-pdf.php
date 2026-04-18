@@ -58,9 +58,10 @@ class Klarhed_PDF {
     }
 
     private function build_html( $attempt, $user ) {
-        $course  = Klarhed_Course::get_data();
-        $primary = get_option( 'klarhed_settings' )['primary_color'] ?? '#B4E600';
-        $ink     = '#0F2A2A';
+        $course      = Klarhed_Course::get_data();
+        $raw_primary = get_option( 'klarhed_settings' )['primary_color'] ?? '#B4E600';
+        $primary     = preg_match( '/^#[0-9a-fA-F]{6}$/', $raw_primary ) ? $raw_primary : '#B4E600';
+        $ink         = '#0F2A2A';
 
         $css = '
             @page { size: A4; margin: 22mm 18mm; }
@@ -93,7 +94,7 @@ class Klarhed_PDF {
                     $avg = $vals ? array_sum( $vals ) / count( $vals ) : 0; ?>
                     <tr>
                         <td style="width:30%"><strong><?php echo esc_html( $g['letter'] ); ?></strong> · <?php echo esc_html( $g['name'] ); ?></td>
-                        <td style="width:50%"><span class="bar" style="width:<?php echo ( $avg / 5 * 100 ); ?>%"></span></td>
+                        <td style="width:50%"><span class="bar" style="width:<?php echo esc_attr( number_format( $avg / 5 * 100, 2 ) ); ?>%"></span></td>
                         <td style="width:20%; text-align:right"><?php echo $avg ? number_format( $avg, 1 ) : '—'; ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -121,7 +122,7 @@ class Klarhed_PDF {
                     $avg = $vals ? array_sum( $vals ) / count( $vals ) : 0; ?>
                     <tr>
                         <td style="width:30%"><strong><?php echo esc_html( $g['letter'] ); ?></strong> · <?php echo esc_html( $g['name'] ); ?></td>
-                        <td style="width:50%"><span class="bar" style="width:<?php echo ( $avg / 5 * 100 ); ?>%"></span></td>
+                        <td style="width:50%"><span class="bar" style="width:<?php echo esc_attr( number_format( $avg / 5 * 100, 2 ) ); ?>%"></span></td>
                         <td style="width:20%; text-align:right"><?php echo $avg ? number_format( $avg, 1 ) : '—'; ?></td>
                     </tr>
                 <?php endforeach; ?>

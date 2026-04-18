@@ -21,7 +21,21 @@ class Klarhed_Admin {
     }
 
     public function register_settings() {
-        register_setting( 'klarhed_settings_group', 'klarhed_settings' );
+        register_setting( 'klarhed_settings_group', 'klarhed_settings', [
+            'sanitize_callback' => [ $this, 'sanitize_settings' ],
+        ] );
+    }
+
+    public function sanitize_settings( $input ) {
+        $clean = [];
+        foreach ( [ 'primary_color' => '#B4E600', 'secondary_color' => '#29C7C7' ] as $key => $default ) {
+            $val = isset( $input[ $key ] ) ? $input[ $key ] : $default;
+            $clean[ $key ] = preg_match( '/^#[0-9a-fA-F]{6}$/', $val ) ? $val : $default;
+        }
+        $clean['require_login']  = ! empty( $input['require_login'] );
+        $clean['auto_save']      = ! empty( $input['auto_save'] );
+        $clean['send_reminders'] = ! empty( $input['send_reminders'] );
+        return $clean;
     }
 
     public function page_overview() {
@@ -65,7 +79,7 @@ class Klarhed_Admin {
                 esc_html( $u->display_name ), esc_html( $u->user_email ), count( $attempts ), $pct, $toggle, $status );
         }
         echo '</tbody></table>';
-        echo '<script>jQuery(function($){$(".klarhed-coach-toggle").on("change",function(){var u=$(this).data("user"),a=$(this).is(":checked");$.ajax({url:wpApiSettings.root+"klarhed/v1/admin/coach-allow",method:"POST",beforeSend:function(x){x.setRequestHeader("X-WP-Nonce",wpApiSettings.nonce)},data:{user_id:u,allow:a?1:0}});});});</script>';
+        wp_print_inline_script_tag( 'jQuery(function($){$(".klarhed-coach-toggle").on("change",function(){var u=$(this).data("user"),a=$(this).is(":checked");$.ajax({url:wpApiSettings.root+"klarhed/v1/admin/coach-allow",method:"POST",beforeSend:function(x){x.setRequestHeader("X-WP-Nonce",wpApiSettings.nonce)},data:{user_id:u,allow:a?1:0}});});});' );
         echo '</div>';
     }
 

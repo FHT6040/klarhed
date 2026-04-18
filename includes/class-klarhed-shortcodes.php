@@ -33,7 +33,7 @@ class Klarhed_Shortcodes {
 
     public function progress() {
         $this->enqueue();
-        $pct = Klarhed_Progress::completion_pct();
+        $pct = (int) Klarhed_Progress::completion_pct();
         return '<div class="klarhed-progress-widget"><span>' . esc_html__( 'Dit forløb', 'klarhed' ) . '</span><div class="kh-progress"><div style="width:' . $pct . '%"></div></div><b>' . $pct . '%</b></div>';
     }
 

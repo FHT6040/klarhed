@@ -39,6 +39,7 @@ class Klarhed_Woo {
     }
 
     public function save_product_field( $post_id ) {
+        if ( ! current_user_can( 'edit_post', $post_id ) ) return;
         $v = isset( $_POST[ self::PRODUCT_META ] ) ? 'yes' : 'no';
         update_post_meta( $post_id, self::PRODUCT_META, $v );
     }
