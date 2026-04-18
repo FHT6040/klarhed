@@ -278,6 +278,143 @@
           les.intro ? h('p', { class: 'kh-muted', text: les.intro }) : null,
           textarea(ch.slug + ':ex:' + i, 6)
         ]); break;
+      case 'quote':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('blockquote', { class: 'kh-quote-block' }, [
+            h('p', { class: 'kh-quote-text', text: '\u201C' + (les.body || '') + '\u201D' }),
+            les.author ? h('footer', { class: 'kh-quote-author', text: '— ' + les.author }) : null
+          ])
+        ]); break;
+      case 'theory':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('div', { class: 'kh-prose', text: les.body || '' })
+        ]); break;
+      case 'pillars':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('div', { class: 'kh-pillars' },
+            (les.items || []).map(function (pillar) {
+              return h('div', { class: 'kh-pillar' }, [
+                h('h4', { class: 'kh-pillar-h', text: pillar.h || '' }),
+                h('p', { class: 'kh-pillar-p', text: pillar.p || '' })
+              ]);
+            })
+          )
+        ]); break;
+      case 'dialogue':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          les.intro ? h('p', { class: 'kh-dialogue-intro', text: les.intro }) : null,
+          h('ol', { class: 'kh-dialogue-list' },
+            (les.items || []).map(function (item) {
+              return h('li', { class: 'kh-dialogue-item', text: item });
+            })
+          )
+        ]); break;
+      case 'selfeval':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('p', { class: 'kh-muted', text: '1 = Passer slet ikke · 5 = Passer helt præcist' }),
+          h('div', { class: 'kh-selfeval-items' },
+            (les.items || []).map(function (item, pi) {
+              var key = ch.slug + ':selfeval:' + i + ':' + pi;
+              return h('div', { class: 'kh-selfeval-item' }, [
+                h('p', { class: 'kh-baseline-text', text: item }),
+                h('div', { class: 'kh-scale' },
+                  [1, 2, 3, 4, 5].map(function (n) {
+                    return h('button', {
+                      class: 'kh-scale-btn' + (Number(state.fields[key]) === n ? ' is-active' : ''),
+                      onclick: function () { state.fields[key] = n; scheduleSync(); renderAll(); }
+                    }, [String(n)]);
+                  })
+                )
+              ]);
+            })
+          )
+        ]); break;
+      case 'selvom-saa':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          les.intro ? h('p', { class: 'kh-muted', text: les.intro }) : null,
+          textarea(ch.slug + ':selvom:' + i, 3)
+        ]); break;
+      case 'commit':
+        var commitLabels = ['Indsigt', 'Handling', 'Løfte'];
+        body = h('div', { class: 'kh-lesson-body' },
+          commitLabels.map(function (label, ci) {
+            var key = ch.slug + ':commit:' + i + ':' + ci;
+            return h('div', { class: 'kh-reflect' }, [
+              h('label', { class: 'kh-reflect-q', text: label }),
+              textarea(key, 3)
+            ]);
+          })
+        ); break;
+      case 'final-measure':
+        var fmGroups = (COURSE.baseline && COURSE.baseline.groups) || [];
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('p', { class: 'kh-muted', text: '1 = Passer slet ikke · 5 = Passer helt præcist' }),
+          h('div', { class: 'kh-baseline kh-baseline--inline' },
+            fmGroups.map(function (g) {
+              return h('div', { class: 'kh-baseline-group' }, [
+                h('h3', { class: 'kh-baseline-letter' }, [
+                  h('span', { class: 'kh-baseline-letter-big', text: g.letter }),
+                  h('span', { class: 'kh-baseline-name', text: g.name })
+                ]),
+                h('div', { class: 'kh-baseline-items' },
+                  (g.items || []).map(function (item, gi) {
+                    var key = g.letter + ':' + gi;
+                    return h('div', { class: 'kh-baseline-item' }, [
+                      h('p', { class: 'kh-baseline-text', text: item }),
+                      h('div', { class: 'kh-scale' },
+                        [1, 2, 3, 4, 5].map(function (n) {
+                          return h('button', {
+                            class: 'kh-scale-btn' + (Number(state.finalMeasure[key]) === n ? ' is-active' : ''),
+                            onclick: function () { state.finalMeasure[key] = n; scheduleSync(); renderAll(); }
+                          }, [String(n)]);
+                        })
+                      )
+                    ]);
+                  })
+                )
+              ]);
+            })
+          )
+        ]); break;
+      case 'compare':
+        var cGroups = (COURSE.baseline && COURSE.baseline.groups) || [];
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('div', { class: 'kh-compare-grid' },
+            cGroups.map(function (g) {
+              var bVals = (g.items || []).map(function (_, gi) { return Number(state.baseline[g.letter + ':' + gi]) || 0; });
+              var fVals = (g.items || []).map(function (_, gi) { return Number(state.finalMeasure[g.letter + ':' + gi]) || 0; });
+              var bAvg = bVals.length ? bVals.reduce(function (a, b) { return a + b; }, 0) / bVals.length : 0;
+              var fAvg = fVals.length ? fVals.reduce(function (a, b) { return a + b; }, 0) / fVals.length : 0;
+              var diff = fAvg - bAvg;
+              return h('div', { class: 'kh-compare-row' }, [
+                h('span', { class: 'kh-mq-letter', text: g.letter }),
+                h('span', { class: 'kh-mq-name', text: g.name }),
+                h('div', { class: 'kh-compare-bars' }, [
+                  h('div', { class: 'kh-compare-bar kh-compare-bar--before', style: 'width:' + (bAvg / 5 * 100) + '%' }),
+                  h('div', { class: 'kh-compare-bar kh-compare-bar--after', style: 'width:' + (fAvg / 5 * 100) + '%' })
+                ]),
+                h('span', {
+                  class: 'kh-compare-diff' + (diff > 0 ? ' is-pos' : diff < 0 ? ' is-neg' : ''),
+                  text: bAvg && fAvg ? (diff > 0 ? '+' : '') + diff.toFixed(1) : '—'
+                })
+              ]);
+            })
+          )
+        ]); break;
+      case 'plan90':
+        body = h('div', { class: 'kh-lesson-body' },
+          [1, 2, 3].map(function (n) {
+            return h('div', { class: 'kh-reflect' }, [
+              h('label', { class: 'kh-reflect-q', text: 'Prioritet ' + n + ': Fokusområde' }),
+              textarea(ch.slug + ':plan90:' + i + ':' + n, 3)
+            ]);
+          })
+        ); break;
+      case 'manifest':
+        body = h('div', { class: 'kh-lesson-body' }, [
+          h('p', { class: 'kh-muted', text: 'Skriv dit personlige ledelsesmanifest — de principper og forpligtelser, du tager med dig herfra.' }),
+          textarea(ch.slug + ':manifest:' + i, 10)
+        ]); break;
       default:
         body = h('div', { class: 'kh-lesson-body' }, [
           h('div', { class: 'kh-prose', text: les.body || '' })
@@ -308,7 +445,15 @@
   }
 
   function kindLabel(k) {
-    return { read: 'Læs', case: 'Case', reflect: 'Refleksion', 'exercise-two-col': 'Øvelse', exercise: 'Øvelse', 'exercise-list': 'Øvelse' }[k] || 'Læs';
+    return {
+      read: 'Læs', case: 'Case', reflect: 'Refleksion',
+      'exercise-two-col': 'Øvelse', exercise: 'Øvelse', 'exercise-list': 'Øvelse',
+      'selvom-saa': 'Øvelse', quote: 'Citat', theory: 'Teori',
+      pillars: 'Nøglepunkter', dialogue: 'Dialogværktøj',
+      selfeval: 'Selvevaluering', commit: 'Indsigt · Handling · Løfte',
+      'final-measure': 'Slutmåling', compare: 'Sammenligning',
+      plan90: '90-dages plan', manifest: 'Manifest'
+    }[k] || 'Læs';
   }
 
   // ---------- render ----------

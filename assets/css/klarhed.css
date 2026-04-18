@@ -114,6 +114,41 @@
 .kh-root .kh-col-label { display: block; font-family: var(--kh-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--kh-muted); margin-bottom: 6px; }
 .kh-root .kh-chapter-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px; }
 
+/* Quote block */
+.kh-root .kh-quote-block { margin: 0; padding: 20px 24px; border-left: 3px solid var(--kh-lime); background: var(--kh-bg-warm); border-radius: 0 12px 12px 0; }
+.kh-root .kh-quote-text { font-family: var(--kh-font-display); font-size: 22px; line-height: 1.4; color: var(--kh-ink); margin: 0 0 10px; font-style: italic; }
+.kh-root .kh-quote-author { font-family: var(--kh-font-mono); font-size: 12px; letter-spacing: .08em; color: var(--kh-muted); }
+
+/* Pillars */
+.kh-root .kh-pillars { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.kh-root .kh-pillar { background: var(--kh-teal-wash); border: 1px solid var(--kh-teal-soft); border-radius: var(--kh-r-md); padding: 16px 18px; }
+.kh-root .kh-pillar-h { font-family: var(--kh-font-display); font-size: 18px; font-weight: 400; color: var(--kh-teal); margin: 0 0 8px; }
+.kh-root .kh-pillar-p { font-size: 14px; color: var(--kh-ink-2); margin: 0; line-height: 1.55; }
+
+/* Dialogue */
+.kh-root .kh-dialogue-intro { color: var(--kh-ink-2); font-size: 15px; margin: 0 0 14px; }
+.kh-root .kh-dialogue-list { margin: 0; padding: 0 0 0 22px; display: grid; gap: 12px; }
+.kh-root .kh-dialogue-item { font-size: 15px; color: var(--kh-ink); line-height: 1.55; padding: 10px 14px; background: var(--kh-bg-warm); border-radius: var(--kh-r-sm); }
+
+/* Self-evaluation */
+.kh-root .kh-selfeval-items { display: grid; gap: 12px; margin-top: 12px; }
+.kh-root .kh-selfeval-item { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 10px 0; border-top: 1px solid var(--kh-line-2); }
+.kh-root .kh-selfeval-item:first-child { border-top: 0; }
+
+/* Before/after comparison */
+.kh-root .kh-compare-grid { display: grid; gap: 14px; }
+.kh-root .kh-compare-row { display: grid; grid-template-columns: 28px 120px 1fr 48px; align-items: center; gap: 12px; }
+.kh-root .kh-compare-bars { display: flex; flex-direction: column; gap: 4px; }
+.kh-root .kh-compare-bar { height: 8px; border-radius: 999px; }
+.kh-root .kh-compare-bar--before { background: var(--kh-line); }
+.kh-root .kh-compare-bar--after { background: var(--kh-lime); }
+.kh-root .kh-compare-diff { font-family: var(--kh-font-mono); font-size: 13px; font-weight: 600; text-align: right; }
+.kh-root .kh-compare-diff.is-pos { color: #2a8c2a; }
+.kh-root .kh-compare-diff.is-neg { color: #c0392b; }
+
+/* Inline baseline (final measure inside chapter) */
+.kh-root .kh-baseline--inline { margin: 12px 0 0; }
+
 @media (max-width: 640px) {
   .kh-root .kh-h1 { font-size: 36px; }
   .kh-root .kh-two-col { grid-template-columns: 1fr; }
