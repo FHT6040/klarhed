@@ -51,7 +51,12 @@ class Klarhed_Admin {
 
     public function page_content() {
         $data = Klarhed_Course::get_data();
-        echo '<div class="wrap"><h1>' . esc_html__( 'Kursusindhold', 'klarhed' ) . '</h1><table class="widefat"><thead><tr><th>#</th><th>Modulnavn</th><th>Slug</th><th>Lektioner</th><th>Varighed</th></tr></thead><tbody>';
+        echo '<div class="wrap"><h1>' . esc_html__( 'Kursusindhold', 'klarhed' ) . '</h1>';
+        if ( empty( $data['chapters'] ) ) {
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'course.json kunne ikke indlæses — tjek wp-content/debug.log.', 'klarhed' ) . '</p></div></div>';
+            return;
+        }
+        echo '<table class="widefat"><thead><tr><th>#</th><th>Modulnavn</th><th>Slug</th><th>Lektioner</th><th>Varighed</th></tr></thead><tbody>';
         foreach ( $data['chapters'] as $c ) {
             printf( '<tr><td>%s</td><td><b>%s</b></td><td><code>%s</code></td><td>%d</td><td>%s</td></tr>',
                 esc_html( $c['letter'] ), esc_html( $c['name'] ), esc_html( $c['slug'] ), count( $c['lessons'] ), esc_html( $c['duration'] ) );

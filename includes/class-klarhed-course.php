@@ -6,8 +6,20 @@ class Klarhed_Course {
 
     public static function get_data() {
         if ( self::$data !== null ) return self::$data;
-        $json = file_get_contents( KLARHED_PATH . 'data/course.json' );
-        self::$data = json_decode( $json, true );
+        $path = KLARHED_PATH . 'data/course.json';
+        if ( ! file_exists( $path ) ) {
+            error_log( 'KLARHED: course.json not found at ' . $path );
+            self::$data = [ 'meta' => [], 'baseline' => [ 'groups' => [] ], 'chapters' => [] ];
+            return self::$data;
+        }
+        $json = file_get_contents( $path );
+        $decoded = json_decode( $json, true );
+        if ( ! is_array( $decoded ) ) {
+            error_log( 'KLARHED: course.json could not be parsed (json_last_error=' . json_last_error() . ')' );
+            self::$data = [ 'meta' => [], 'baseline' => [ 'groups' => [] ], 'chapters' => [] ];
+            return self::$data;
+        }
+        self::$data = $decoded;
         return self::$data;
     }
 

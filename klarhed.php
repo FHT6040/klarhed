@@ -3,7 +3,7 @@
  * Plugin Name: KLARHED — Lederskabsforløb
  * Plugin URI:  https://frank-tessin.dk/klarhed
  * Description: Et komplet 8-moduls online-lederskabsforløb baseret på KLARHED-arbejdsbogen af Frank Tessin. Indeholder baseline-måling, refleksionsøvelser, dialogværktøjer, selvevalueringer, cases og en 90-dages plan.
- * Version:     1.1.0
+ * Version:     1.2.1
  * Author:      Frank Tessin
  * Author URI:  https://frank-tessin.dk
  * Text Domain: klarhed
@@ -15,7 +15,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'KLARHED_VERSION', '1.1.0' );
+define( 'KLARHED_VERSION', '1.2.1' );
 define( 'KLARHED_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KLARHED_URL',  plugin_dir_url( __FILE__ ) );
 
