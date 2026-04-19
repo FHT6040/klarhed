@@ -5,7 +5,7 @@
  * Description: Et komplet 8-moduls online-lederskabsforløb baseret på KLARHED-arbejdsbogen af Frank Tessin. Indeholder baseline-måling, refleksionsøvelser, dialogværktøjer, selvevalueringer, cases og en 90-dages plan.
  * Version:     1.2.3
  * Author:      Frank Tessin
- * Author URI:  https://frank-tessin.dk
+ * Author URI:  https://frank.tessin.dk
  * Text Domain: klarhed
  * Domain Path: /languages
  * License:     GPLv2 or later
@@ -84,6 +84,7 @@ class Klarhed_Plugin {
     }
 
     public function enqueue_admin( $hook ) {
+        wp_add_inline_style( 'common', '#adminmenu #toplevel_page_klarhed .wp-menu-image img{width:20px;height:20px}' );
         if ( strpos( $hook, 'klarhed' ) === false ) return;
         wp_enqueue_style( 'klarhed-admin', KLARHED_URL . 'assets/css/klarhed-admin.css', [], KLARHED_VERSION );
     }
