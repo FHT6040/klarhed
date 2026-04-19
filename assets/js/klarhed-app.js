@@ -89,7 +89,7 @@
   // ---------- router ----------
   var route = { view: 'home' };
   try { var r = JSON.parse(localStorage.getItem('klarhed_route') || 'null'); if (r) route = r; } catch (e) {}
-  function go(next) { route = next; localStorage.setItem('klarhed_route', JSON.stringify(route)); renderAll(); window.scrollTo(0, 0); }
+  function go(next) { route = next; localStorage.setItem('klarhed_route', JSON.stringify(route)); renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
   // ---------- views ----------
   function Header() {
@@ -260,13 +260,13 @@
           h('h2', { class: 'kh-chapter-done-title', text: 'Kapitel gennemf\u00f8rt' }),
           h('p', { class: 'kh-chapter-done-sub', text: 'Godt arbejde. Du kan altid vende tilbage og tilpasse dine svar.' }),
           idx < COURSE.chapters.length - 1
-            ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Forts\u00e6t til n\u00e6ste kapitel \u2192'])
+            ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Forts\u00e6t til n\u00e6ste modul \u2192'])
             : null
         ]);
       })(),
       h('div', { class: 'kh-chapter-nav' }, [
-        idx > 0 ? h('button', { class: 'kh-btn kh-btn--ghost', onclick: function () { go({ view: 'chapter', idx: idx - 1 }); } }, ['← Forrige kapitel']) : h('span'),
-        idx < COURSE.chapters.length - 1 ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Næste kapitel →']) : null
+        idx > 0 ? h('button', { class: 'kh-btn kh-btn--ghost', onclick: function () { go({ view: 'chapter', idx: idx - 1 }); } }, ['← Forrige modul']) : h('span'),
+        idx < COURSE.chapters.length - 1 ? h('button', { class: 'kh-btn kh-btn--lime', onclick: function () { go({ view: 'chapter', idx: idx + 1 }); } }, ['Næste modul →']) : null
       ])
     ]);
   }
