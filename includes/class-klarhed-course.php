@@ -6,20 +6,29 @@ class Klarhed_Course {
 
     public static function get_data() {
         if ( self::$data !== null ) return self::$data;
-        $path = KLARHED_PATH . 'data/course.json';
-        if ( ! file_exists( $path ) ) {
-            error_log( 'KLARHED: course.json not found at ' . $path );
-            self::$data = [ 'meta' => [], 'baseline' => [ 'groups' => [] ], 'chapters' => [] ];
-            return self::$data;
+
+        // Primary: PHP file in includes/ (always deployed via FTP)
+        $php_path = KLARHED_PATH . 'includes/course-data.php';
+        if ( file_exists( $php_path ) ) {
+            $decoded = include $php_path;
+            if ( is_array( $decoded ) && ! empty( $decoded['chapters'] ) ) {
+                self::$data = $decoded;
+                return self::$data;
+            }
         }
-        $json = file_get_contents( $path );
-        $decoded = json_decode( $json, true );
-        if ( ! is_array( $decoded ) ) {
-            error_log( 'KLARHED: course.json could not be parsed (json_last_error=' . json_last_error() . ')' );
-            self::$data = [ 'meta' => [], 'baseline' => [ 'groups' => [] ], 'chapters' => [] ];
-            return self::$data;
+
+        // Fallback: data/course.json
+        $json_path = KLARHED_PATH . 'data/course.json';
+        if ( file_exists( $json_path ) ) {
+            $decoded = json_decode( file_get_contents( $json_path ), true );
+            if ( is_array( $decoded ) ) {
+                self::$data = $decoded;
+                return self::$data;
+            }
         }
-        self::$data = $decoded;
+
+        error_log( 'KLARHED: could not load course data from includes/course-data.php or data/course.json' );
+        self::$data = [ 'meta' => [], 'baseline' => [ 'groups' => [] ], 'chapters' => [] ];
         return self::$data;
     }
 
