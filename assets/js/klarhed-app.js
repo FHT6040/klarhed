@@ -89,7 +89,7 @@
   // ---------- router ----------
   var route = { view: 'home' };
   try { var r = JSON.parse(localStorage.getItem('klarhed_route') || 'null'); if (r) route = r; } catch (e) {}
-  function go(next) { route = next; localStorage.setItem('klarhed_route', JSON.stringify(route)); renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function go(next) { route = next; localStorage.setItem('klarhed_route', JSON.stringify(route)); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(renderAll, 350); }
 
   // ---------- views ----------
   function Header() {

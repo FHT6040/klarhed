@@ -71,7 +71,7 @@
 .kh-root .kh-chapter-letter { font-family: var(--kh-font-display); font-size: 44px; line-height: 1; color: var(--kh-teal); flex: 0 0 56px; }
 .kh-root .kh-chapter-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .kh-root .kh-chapter-title { font-family: var(--kh-font-display); font-size: 20px; font-weight: 400; margin: 2px 0 4px; }
-.kh-root .kh-chapter-summary { font-size: 13px; color: var(--kh-muted); margin: 0 0 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kh-root .kh-chapter-summary { font-size: 13px; color: var(--kh-muted); margin: 0 0 10px; }
 .kh-root .kh-chapter-progress { display: flex; align-items: center; gap: 10px; margin-top: auto; }
 .kh-root .kh-mini-bar { flex: 1; height: 4px; background: var(--kh-line-2); border-radius: 999px; overflow: hidden; }
 .kh-root .kh-mini-fill { height: 100%; background: var(--kh-lime); }
