@@ -227,6 +227,37 @@
   .kh-root .kh-header-progress { min-width: 100px; }
 }
 
+/* ── Welcome card ────────────────────────────────────────────────────── */
+.kh-root .kh-welcome-card {
+  background: var(--kh-white); border: 2px solid var(--kh-teal-soft);
+  border-radius: var(--kh-r-lg); padding: 28px 30px; margin: 0 0 28px;
+  animation: kh-fade-in .3s ease;
+}
+.kh-root .kh-welcome-q { font-size: 18px; margin-bottom: 12px; display: block; }
+.kh-root .kh-welcome-footer { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+.kh-root .kh-welcome-skip {
+  background: transparent; border: 0; color: var(--kh-muted);
+  font-family: var(--kh-font-sans); font-size: 13px; cursor: pointer; padding: 0;
+}
+.kh-root .kh-welcome-skip:hover { color: var(--kh-ink); }
+.kh-root .kh-btn:disabled { opacity: .45; cursor: default; }
+
+/* ── Next lesson widget ──────────────────────────────────────────────── */
+.kh-root .kh-next-lesson {
+  width: 100%; display: flex; align-items: center; gap: 20px;
+  background: var(--kh-ink); color: var(--kh-white);
+  border: 0; border-radius: var(--kh-r-lg); padding: 22px 28px;
+  cursor: pointer; text-align: left; font-family: inherit;
+  margin: 0 0 8px; transition: background .15s;
+}
+.kh-root .kh-next-lesson:hover { background: #1a3f3f; }
+.kh-root .kh-next-lesson .kh-eyebrow { color: var(--kh-lime); margin: 0 0 4px; }
+.kh-root .kh-next-chapter { font-family: var(--kh-font-mono); font-size: 11px; letter-spacing: .1em; color: rgba(255,255,255,.45); margin: 0; }
+.kh-root .kh-next-lesson-meta { flex: 0 0 auto; min-width: 140px; }
+.kh-root .kh-next-lesson-body { flex: 1; }
+.kh-root .kh-next-title { font-family: var(--kh-font-display); font-size: 20px; font-weight: 400; margin: 0; color: var(--kh-white); }
+.kh-root .kh-next-arrow { font-size: 20px; color: var(--kh-lime); flex: 0 0 auto; }
+
 /* ── Dashboard hero ──────────────────────────────────────────────────── */
 .kh-root .kh-hero {
   background: linear-gradient(160deg, var(--kh-bg-warm) 0%, var(--kh-lime-wash) 55%, var(--kh-white) 100%);

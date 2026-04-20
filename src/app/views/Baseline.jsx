@@ -15,8 +15,8 @@ export function Baseline( { course, snapshot, store, go } ) {
         <main className="kh-container">
             <button className="kh-back" onClick={ () => go( { view: 'home' } ) }>← Dashboard</button>
             <p className="kh-eyebrow">Baseline-måling · { totalItems } udsagn · 10 min</p>
-            <h1 className="kh-h1">Hvor står du lige nu?</h1>
-            { course?.baseline?.intro && <p className="kh-lead">{ course.baseline.intro }</p> }
+            <h1 className="kh-h1">Hvor <em>står</em> du lige nu?</h1>
+            <p className="kh-lead">Dit udgangspunkt er det, der gør din transformation synlig. Svar ærligt — dine svar er kun synlige for dig.</p>
             { course?.baseline?.scale && <p className="kh-muted">{ course.baseline.scale }</p> }
 
             <div className="kh-baseline-progress-line">

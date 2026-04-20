@@ -32,7 +32,7 @@ export function App( { boot, store } ) {
     return (
         <div className="kh-root">
             <Header course={ boot.course } snapshot={ snapshot } go={ go } />
-            { route.view === 'home'     && <Dashboard  course={ boot.course } snapshot={ snapshot } store={ store } go={ go } /> }
+            { route.view === 'home'     && <Dashboard  course={ boot.course } snapshot={ snapshot } store={ store } go={ go } user={ boot.user } /> }
             { route.view === 'baseline' && <Baseline   course={ boot.course } snapshot={ snapshot } store={ store } go={ go } /> }
             { route.view === 'chapter'  && <Chapter    course={ boot.course } snapshot={ snapshot } store={ store } go={ go } idx={ route.idx } /> }
             { route.view === 'compare'  && <Comparison course={ boot.course } snapshot={ snapshot } go={ go } /> }

@@ -1,57 +1,146 @@
-export function Dashboard( { course, snapshot, go } ) {
-    const chapters   = course?.chapters || [];
-    const active     = snapshot.attempts.find( ( a ) => a.id === snapshot.activeId );
+import { useState } from '@wordpress/element';
+
+export function Dashboard( { course, snapshot, store, go, user } ) {
+    const chapters    = course?.chapters || [];
+    const active      = snapshot.attempts.find( ( a ) => a.id === snapshot.activeId );
+    const progress    = active?.progress || {};
+    const fields      = active?.fields   || {};
     const hasBaseline = Object.keys( active?.baseline || {} ).length > 0;
+    const welcomed    = !! fields[ 'welcome:challenge' ];
+
+    const dayNum = active?.createdAt
+        ? Math.max( 1, Math.floor( ( Date.now() - new Date( active.createdAt ) ) / 86400000 ) + 1 )
+        : null;
+
+    const eyebrow = [
+        user   ? `Hej ${ user }`      : 'KLARHED',
+        dayNum ? `Dag ${ dayNum }`     : `${ chapters.length } kapitler`,
+        dayNum ? `${ chapters.length } kapitler` : 'baseline + slutmåling',
+    ].join( ' · ' );
+
+    const next = findNextLesson( chapters, progress );
 
     return (
         <>
             <div className="kh-hero">
                 <div className="kh-hero-inner">
-                    <p className="kh-eyebrow">KLARHED · { chapters.length } kapitler · baseline + slutmåling</p>
+                    <p className="kh-eyebrow">{ eyebrow }</p>
                     <h1 className="kh-h1">Fra indsigt til <em>integreret</em> lederskab.</h1>
                     { ( course?.description || course?.tagline ) && (
                         <p className="kh-lead">{ course.description || course.tagline }</p>
                     ) }
                 </div>
             </div>
-        <main className="kh-container kh-container--slim-top">
-            { hasBaseline
-                ? <BaselineSummary groups={ course?.baseline?.groups || [] } baseline={ active.baseline } go={ go } />
-                : <BaselineCTA go={ go } /> }
 
-            <h2 className="kh-h2">Kapitler</h2>
-            <div className="kh-chapter-grid">
-                { chapters.map( ( ch, idx ) => (
-                    <ChapterCard key={ ch.slug } ch={ ch } idx={ idx } progress={ active?.progress || {} } go={ go } />
-                ) ) }
-            </div>
+            <main className="kh-container kh-container--slim-top">
 
-            { hasBaseline && (
-                <div className="kh-dashboard-actions">
-                    <button className="kh-btn kh-btn--ghost" onClick={ () => go( { view: 'compare' } ) }>
-                        Se din transformation →
-                    </button>
+                { ! welcomed && (
+                    <WelcomeCard user={ user } store={ store } />
+                ) }
+
+                { hasBaseline
+                    ? <BaselineSummary groups={ course?.baseline?.groups || [] } baseline={ active.baseline } go={ go } />
+                    : <BaselineCTA go={ go } /> }
+
+                { hasBaseline && next && (
+                    <NextLesson next={ next } go={ go } />
+                ) }
+
+                <h2 className="kh-h2">Kapitler</h2>
+                <div className="kh-chapter-grid">
+                    { chapters.map( ( ch, idx ) => (
+                        <ChapterCard key={ ch.slug } ch={ ch } idx={ idx } progress={ progress } go={ go } />
+                    ) ) }
                 </div>
-            ) }
-        </main>
+
+                { hasBaseline && (
+                    <div className="kh-dashboard-actions">
+                        <button className="kh-btn kh-btn--ghost" onClick={ () => go( { view: 'compare' } ) }>
+                            Se din transformation →
+                        </button>
+                    </div>
+                ) }
+            </main>
         </>
     );
 }
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function findNextLesson( chapters, progress ) {
+    for ( let ci = 0; ci < chapters.length; ci++ ) {
+        const ch = chapters[ ci ];
+        for ( let li = 0; li < ( ch.lessons || [] ).length; li++ ) {
+            if ( ! progress[ `${ ch.slug }:${ li }` ] ) {
+                return { chapter: ch, chapterIdx: ci, lesson: ch.lessons[ li ] };
+            }
+        }
+    }
+    return null;
+}
+
+// ── Welcome card — shows once until answered ──────────────────────────────
+
+function WelcomeCard( { user, store } ) {
+    const [ val, setVal ]           = useState( '' );
+    const [ submitted, setSubmitted ] = useState( false );
+
+    if ( submitted ) return null;
+
+    const handleSubmit = () => {
+        if ( ! val.trim() ) return;
+        setSubmitted( true );
+        store.saveAnswers( { fields: { 'welcome:challenge': val.trim() } } );
+    };
+
+    return (
+        <div className="kh-welcome-card">
+            <p className="kh-eyebrow">Inden vi starter</p>
+            <h3 className="kh-h3">{ user ? `Hej ${ user }` : 'Hej' } — ét spørgsmål til dig:</h3>
+            <label className="kh-reflect-q kh-welcome-q">
+                Hvad er din vigtigste udfordring som leder lige nu?
+            </label>
+            <textarea
+                className="kh-textarea"
+                value={ val }
+                rows={ 3 }
+                placeholder="Skriv her…"
+                onChange={ ( e ) => setVal( e.target.value ) }
+            />
+            <div className="kh-welcome-footer">
+                <button
+                    className="kh-btn kh-btn--lime"
+                    disabled={ ! val.trim() }
+                    onClick={ handleSubmit }
+                >
+                    Gem og start forløbet →
+                </button>
+                <button className="kh-welcome-skip" onClick={ () => setSubmitted( true ) }>
+                    Spring over
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// ── Baseline CTA — re-framed ──────────────────────────────────────────────
 
 function BaselineCTA( { go } ) {
     return (
         <div className="kh-card kh-card--accent">
             <div>
-                <p className="kh-eyebrow">Start her · 10 min</p>
-                <h3 className="kh-h3">Tag din baseline-måling</h3>
-                <p className="kh-muted">Før vi dykker ned i KLARHED-modellen, skal vi vide, hvor du står. Vær ærlig — der er ingen rigtige eller forkerte svar.</p>
+                <p className="kh-eyebrow">Inden vi starter · 10 min</p>
+                <h3 className="kh-h3">Find dit udgangspunkt</h3>
+                <p className="kh-muted">Det er det, der gør din transformation synlig. Ærlige svar — der er ingen rigtige eller forkerte.</p>
             </div>
             <button className="kh-btn kh-btn--lime" onClick={ () => go( { view: 'baseline' } ) }>
-                Start baseline →
+                Find mit udgangspunkt →
             </button>
         </div>
     );
 }
+
+// ── Baseline summary ──────────────────────────────────────────────────────
 
 function BaselineSummary( { groups, baseline, go } ) {
     return (
@@ -84,6 +173,28 @@ function BaselineSummary( { groups, baseline, go } ) {
         </div>
     );
 }
+
+// ── Next lesson widget ────────────────────────────────────────────────────
+
+function NextLesson( { next, go } ) {
+    return (
+        <button
+            className="kh-next-lesson"
+            onClick={ () => go( { view: 'chapter', idx: next.chapterIdx } ) }
+        >
+            <div className="kh-next-lesson-meta">
+                <p className="kh-eyebrow">Fortsæt her</p>
+                <p className="kh-next-chapter">{ next.chapter.letter } · { next.chapter.name }</p>
+            </div>
+            <div className="kh-next-lesson-body">
+                <h3 className="kh-next-title">{ next.lesson.title }</h3>
+            </div>
+            <span className="kh-next-arrow">→</span>
+        </button>
+    );
+}
+
+// ── Chapter card ──────────────────────────────────────────────────────────
 
 function ChapterCard( { ch, idx, progress, go } ) {
     const lessons    = ch.lessons || [];
