@@ -4,13 +4,17 @@ export function Dashboard( { course, snapshot, go } ) {
     const hasBaseline = Object.keys( active?.baseline || {} ).length > 0;
 
     return (
-        <main className="kh-container">
-            <p className="kh-eyebrow">KLARHED · { chapters.length } kapitler · baseline + slutmåling</p>
-            <h1 className="kh-h1">Fra indsigt til <em>integreret</em> lederskab.</h1>
-            { ( course?.description || course?.tagline ) && (
-                <p className="kh-lead">{ course.description || course.tagline }</p>
-            ) }
-
+        <>
+            <div className="kh-hero">
+                <div className="kh-hero-inner">
+                    <p className="kh-eyebrow">KLARHED · { chapters.length } kapitler · baseline + slutmåling</p>
+                    <h1 className="kh-h1">Fra indsigt til <em>integreret</em> lederskab.</h1>
+                    { ( course?.description || course?.tagline ) && (
+                        <p className="kh-lead">{ course.description || course.tagline }</p>
+                    ) }
+                </div>
+            </div>
+        <main className="kh-container kh-container--slim-top">
             { hasBaseline
                 ? <BaselineSummary groups={ course?.baseline?.groups || [] } baseline={ active.baseline } go={ go } />
                 : <BaselineCTA go={ go } /> }
@@ -30,6 +34,7 @@ export function Dashboard( { course, snapshot, go } ) {
                 </div>
             ) }
         </main>
+        </>
     );
 }
 
