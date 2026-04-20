@@ -143,6 +143,17 @@ function BaselineCTA( { go } ) {
 // ── Baseline summary ──────────────────────────────────────────────────────
 
 function BaselineSummary( { groups, baseline, go } ) {
+    const rowAvgs = groups.map( ( g ) => {
+        const vals = ( g.items || [] ).map( ( _, i ) => Number( baseline[ `${ g.letter }:${ i }` ] ) || 0 );
+        return vals.length ? vals.reduce( ( a, b ) => a + b, 0 ) / vals.length : 0;
+    } );
+    const filledAvgs = rowAvgs.filter( ( v ) => v > 0 );
+    const totalMQ    = filledAvgs.length ? filledAvgs.reduce( ( a, b ) => a + b, 0 ) / filledAvgs.length : 0;
+    const interpretation = totalMQ < 2 ? 'Dit udgangspunkt er kortlagt'
+        : totalMQ < 3 ? 'Du har et fundament at bygge på'
+        : totalMQ < 4 ? 'Du er stærkt positioneret'
+        : 'Fremragende udgangspunkt';
+
     return (
         <div className="kh-card">
             <div className="kh-card-head">
@@ -155,21 +166,26 @@ function BaselineSummary( { groups, baseline, go } ) {
                 </button>
             </div>
             <div className="kh-mq-grid">
-                { groups.map( ( g ) => {
-                    const vals = ( g.items || [] ).map( ( _, i ) => Number( baseline[ `${ g.letter }:${ i }` ] ) || 0 );
-                    const avg  = vals.length ? vals.reduce( ( a, b ) => a + b, 0 ) / vals.length : 0;
-                    return (
-                        <div key={ g.letter } className="kh-mq-row">
-                            <span className="kh-mq-letter">{ g.letter }</span>
-                            <span className="kh-mq-name">{ g.name }</span>
-                            <div className="kh-mq-bar">
-                                <div className="kh-mq-fill" style={ { width: `${ avg / 5 * 100 }%` } } />
-                            </div>
-                            <span className="kh-mq-num">{ avg ? avg.toFixed( 1 ) : '—' }</span>
+                { groups.map( ( g, gi ) => (
+                    <div key={ g.letter } className="kh-mq-row">
+                        <span className="kh-mq-letter">{ g.letter }</span>
+                        <span className="kh-mq-name">{ g.name }</span>
+                        <div className="kh-mq-bar">
+                            <div className="kh-mq-fill" style={ { width: `${ rowAvgs[ gi ] / 5 * 100 }%` } } />
                         </div>
-                    );
-                } ) }
+                        <span className="kh-mq-num">{ rowAvgs[ gi ] ? rowAvgs[ gi ].toFixed( 1 ) : '—' }</span>
+                    </div>
+                ) ) }
             </div>
+            { totalMQ > 0 && (
+                <div className="kh-mq-total">
+                    <span className="kh-mq-total-score">{ totalMQ.toFixed( 1 ) }</span>
+                    <div>
+                        <p className="kh-eyebrow">Samlet MQ</p>
+                        <p className="kh-mq-total-label">{ interpretation }</p>
+                    </div>
+                </div>
+            ) }
         </div>
     );
 }

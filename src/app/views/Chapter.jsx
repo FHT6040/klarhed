@@ -58,6 +58,8 @@ export function Chapter( { course, snapshot, store, go, idx } ) {
             </h1>
             { ch.summary && <p className="kh-lead">{ ch.summary }</p> }
 
+            <BaselineRef ch={ ch } baseline={ baseline } baselineGroups={ baselineGroups } />
+
             <div className="kh-lessons">
                 { lessons.map( ( les, i ) => {
                     const pKey = `${ ch.slug }:${ i }`;
@@ -75,16 +77,7 @@ export function Chapter( { course, snapshot, store, go, idx } ) {
             </div>
 
             { allDone && (
-                <div className="kh-chapter-done">
-                    <p className="kh-chapter-done-icon">✶</p>
-                    <h2 className="kh-chapter-done-title">Kapitel gennemført</h2>
-                    <p className="kh-chapter-done-sub">Godt arbejde. Du kan altid vende tilbage og tilpasse dine svar.</p>
-                    { idx < chapters.length - 1 && (
-                        <button className="kh-btn kh-btn--lime" onClick={ () => go( { view: 'chapter', idx: idx + 1 } ) }>
-                            Fortsæt til næste modul →
-                        </button>
-                    ) }
-                </div>
+                <ChapterDone ch={ ch } idx={ idx } chapters={ chapters } lessons={ lessons } go={ go } />
             ) }
 
             <div className="kh-chapter-nav">
@@ -143,6 +136,51 @@ function FocusOverlay( { focusMode, value, onChange, onClose } ) {
                     <button className="kh-btn kh-btn--lime" onClick={ handleClose }>Gem ✓</button>
                 </div>
             </div>
+        </div>
+    );
+}
+
+// ── Baseline reference — shown at top of chapter when baseline is filled ─
+
+function BaselineRef( { ch, baseline, baselineGroups } ) {
+    const group = baselineGroups.find( ( g ) => g.letter === ch.letter );
+    if ( ! group ) return null;
+    const vals = ( group.items || [] ).map( ( _, i ) => Number( baseline[ `${ ch.letter }:${ i }` ] ) || 0 );
+    const nonZero = vals.filter( ( v ) => v > 0 );
+    if ( ! nonZero.length ) return null;
+    const avg = nonZero.reduce( ( a, b ) => a + b, 0 ) / nonZero.length;
+
+    return (
+        <div className="kh-chapter-baseline-ref">
+            <span className="kh-eyebrow">Dit baseline-udgangspunkt</span>
+            <span className="kh-chapter-baseline-score">
+                { avg.toFixed( 1 ) }<span>/5</span>
+            </span>
+            <span className="kh-chapter-baseline-label">på { ch.letter } · { ch.name }</span>
+        </div>
+    );
+}
+
+// ── Chapter completion banner ─────────────────────────────────────────────
+
+function ChapterDone( { ch, idx, chapters, lessons, go } ) {
+    const quote = lessons.find( ( l ) => l.kind === 'quote' );
+    return (
+        <div className="kh-chapter-done">
+            <div className="kh-chapter-done-letter">{ ch.letter }</div>
+            <h2 className="kh-chapter-done-title">Kapitel gennemført</h2>
+            { quote && (
+                <blockquote className="kh-chapter-done-quote">
+                    <p>"{ quote.body }"</p>
+                    { quote.author && <footer>— { quote.author }</footer> }
+                </blockquote>
+            ) }
+            <p className="kh-chapter-done-sub">Godt arbejde. Du kan altid vende tilbage og tilpasse dine svar.</p>
+            { idx < chapters.length - 1 && (
+                <button className="kh-btn kh-btn--lime" onClick={ () => go( { view: 'chapter', idx: idx + 1 } ) }>
+                    Fortsæt til næste modul →
+                </button>
+            ) }
         </div>
     );
 }

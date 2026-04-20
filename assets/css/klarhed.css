@@ -227,6 +227,70 @@
   .kh-root .kh-header-progress { min-width: 100px; }
 }
 
+/* ── Milestone toast ─────────────────────────────────────────────────── */
+@keyframes kh-toast-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.kh-milestone-toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9001;
+  background: var(--kh-ink); color: var(--kh-white);
+  border-radius: var(--kh-r-lg); padding: 18px 20px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: 0 8px 40px rgba(15,42,42,.35);
+  animation: kh-toast-in .3s ease; max-width: 320px;
+  font-family: var(--kh-font-sans);
+}
+.kh-milestone-pct {
+  font-family: var(--kh-font-display); font-size: 36px; line-height: 1;
+  color: var(--kh-lime); flex: 0 0 auto;
+}
+.kh-milestone-text strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.kh-milestone-text p { font-size: 13px; color: rgba(255,255,255,.6); margin: 0; }
+.kh-milestone-dismiss {
+  background: transparent; border: 0; color: rgba(255,255,255,.4);
+  font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
+  margin-left: auto; flex-shrink: 0;
+}
+.kh-milestone-dismiss:hover { color: var(--kh-white); }
+
+/* ── MQ total score ──────────────────────────────────────────────────── */
+.kh-root .kh-mq-total {
+  display: flex; align-items: center; gap: 16px;
+  border-top: 1px solid var(--kh-line-2); margin-top: 16px; padding-top: 16px;
+}
+.kh-root .kh-mq-total-score {
+  font-family: var(--kh-font-display); font-size: 40px; line-height: 1;
+  color: var(--kh-teal); flex: 0 0 auto;
+}
+.kh-root .kh-mq-total-label { font-size: 14px; color: var(--kh-ink-2); margin: 2px 0 0; }
+
+/* ── Chapter baseline reference ──────────────────────────────────────── */
+.kh-root .kh-chapter-baseline-ref {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--kh-teal-wash); border: 1px solid var(--kh-teal-soft);
+  border-radius: var(--kh-r-md); padding: 8px 16px; margin: 4px 0 24px;
+}
+.kh-root .kh-chapter-baseline-ref .kh-eyebrow { margin: 0; }
+.kh-root .kh-chapter-baseline-score {
+  font-family: var(--kh-font-display); font-size: 22px; color: var(--kh-teal); line-height: 1;
+}
+.kh-root .kh-chapter-baseline-score span { font-size: 13px; color: var(--kh-muted); }
+.kh-root .kh-chapter-baseline-label { font-size: 13px; color: var(--kh-ink-2); }
+
+/* ── Enhanced chapter done banner ────────────────────────────────────── */
+.kh-root .kh-chapter-done-letter {
+  font-family: var(--kh-font-display); font-size: 96px; line-height: 1;
+  color: var(--kh-lime); margin: 0 0 8px;
+}
+.kh-root .kh-chapter-done-quote {
+  font-family: var(--kh-font-display); font-size: 18px; font-style: italic;
+  line-height: 1.5; color: var(--kh-ink-2); margin: 0 0 20px;
+  max-width: 520px; text-align: center;
+}
+.kh-root .kh-chapter-done-quote p { margin: 0 0 6px; }
+.kh-root .kh-chapter-done-quote footer { font-family: var(--kh-font-mono); font-size: 11px; letter-spacing: .08em; color: var(--kh-muted); font-style: normal; }
+
 /* ── Welcome card ────────────────────────────────────────────────────── */
 .kh-root .kh-welcome-card {
   background: var(--kh-white); border: 2px solid var(--kh-teal-soft);
