@@ -7,7 +7,7 @@ class Klarhed_Course {
     public static function get_data() {
         if ( self::$data !== null ) return self::$data;
 
-        // Primary: PHP file in includes/ (always deployed via FTP)
+        // Canonical source: edit course content here, not in data/course.json.
         $php_path = KLARHED_PATH . 'includes/course-data.php';
         if ( file_exists( $php_path ) ) {
             $decoded = include $php_path;
@@ -17,7 +17,7 @@ class Klarhed_Course {
             }
         }
 
-        // Fallback: data/course.json
+        // Fallback only — do not edit data/course.json directly.
         $json_path = KLARHED_PATH . 'data/course.json';
         if ( file_exists( $json_path ) ) {
             $decoded = json_decode( file_get_contents( $json_path ), true );

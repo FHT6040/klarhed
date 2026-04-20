@@ -1,4 +1,5 @@
 <?php
+// Canonical source for all course content. Edit here — data/course.json is fallback only.
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 return json_decode( <<<'JSON'
 {

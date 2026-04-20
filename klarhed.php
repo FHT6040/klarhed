@@ -61,11 +61,18 @@ class Klarhed_Plugin {
             [ 'klarhed-fonts' ], KLARHED_VERSION );
 
         // Prefer the compiled wp-scripts bundle when present
-        $asset_file = KLARHED_PATH . 'assets/build/index.asset.php';
+        // wp-scripts names output after the entry filename (src/index.jsx → index.jsx.js)
+        $asset_file = KLARHED_PATH . 'assets/build/index.jsx.asset.php';
+        if ( ! file_exists( $asset_file ) ) {
+            $asset_file = KLARHED_PATH . 'assets/build/index.asset.php'; // legacy name
+        }
         if ( file_exists( $asset_file ) ) {
-            $asset = include $asset_file;
+            $asset    = include $asset_file;
+            $js_file  = file_exists( KLARHED_PATH . 'assets/build/index.jsx.js' )
+                ? 'assets/build/index.jsx.js'
+                : 'assets/build/index.js';
             wp_register_script( 'klarhed-app',
-                KLARHED_URL . 'assets/build/index.js',
+                KLARHED_URL . $js_file,
                 $asset['dependencies'] ?? [ 'wp-element', 'wp-api-fetch' ],
                 $asset['version'] ?? KLARHED_VERSION, true );
         } else {

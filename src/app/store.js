@@ -4,8 +4,30 @@ import apiFetch from '@wordpress/api-fetch';
 const listeners = new Set();
 let state = { loading: true, attempts: [], activeId: null, share: null };
 
-const notify = () => listeners.forEach( ( l ) => l( state ) );
+const notify  = () => listeners.forEach( ( l ) => l( state ) );
 const setState = ( patch ) => { state = { ...state, ...patch }; notify(); };
+
+function mergeIntoActive( id, patch ) {
+    return state.attempts.map( ( a ) => {
+        if ( a.id !== id ) return a;
+        const next = { ...a };
+        for ( const k of [ 'progress', 'fields', 'baseline', 'finalMeasure' ] ) {
+            if ( patch[ k ] ) next[ k ] = { ...( a[ k ] || {} ), ...patch[ k ] };
+        }
+        return next;
+    } );
+}
+
+let syncTimer   = null;
+let pendingSync = null;
+
+function merge4( a, b ) {
+    const r = {};
+    for ( const k of [ 'progress', 'fields', 'baseline', 'finalMeasure' ] ) {
+        r[ k ] = { ...( a[ k ] || {} ), ...( b[ k ] || {} ) };
+    }
+    return r;
+}
 
 export const store = {
     subscribe: ( fn ) => { listeners.add( fn ); fn( state ); return () => listeners.delete( fn ); },
@@ -31,9 +53,17 @@ export const store = {
         await this.load();
     },
 
-    async saveAnswers( patch ) {
+    // Optimistic local update + debounced REST sync (accumulates patches)
+    saveAnswers( patch ) {
         const id = state.activeId; if ( ! id ) return;
-        await apiFetch( { path: `klarhed/v1/attempts/${ id }/answers`, method: 'POST', data: patch } );
+        setState( { attempts: mergeIntoActive( id, patch ) } );
+        pendingSync = pendingSync ? merge4( pendingSync, patch ) : patch;
+        clearTimeout( syncTimer );
+        syncTimer = setTimeout( () => {
+            const p = pendingSync; pendingSync = null;
+            apiFetch( { path: `klarhed/v1/attempts/${ id }/answers`, method: 'POST', data: p } )
+                .catch( () => {} ); // offline OK
+        }, 800 );
     },
 
     async updateShare( patch ) {
