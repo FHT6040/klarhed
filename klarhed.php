@@ -3,7 +3,7 @@
  * Plugin Name: KLARHED — Lederskabsforløb
  * Plugin URI:  https://frank-tessin.dk/klarhed
  * Description: Et komplet 8-moduls online-lederskabsforløb baseret på KLARHED-arbejdsbogen af Frank Tessin. Indeholder baseline-måling, refleksionsøvelser, dialogværktøjer, selvevalueringer, cases og en 90-dages plan.
- * Version:     1.2.6
+ * Version:     1.2.7
  * Author:      Frank Tessin
  * Author URI:  https://frank.tessin.dk
  * Text Domain: klarhed
@@ -15,7 +15,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'KLARHED_VERSION', '1.2.6' );
+define( 'KLARHED_VERSION', '1.2.7' );
 define( 'KLARHED_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KLARHED_URL',  plugin_dir_url( __FILE__ ) );
 
@@ -32,9 +32,13 @@ require_once KLARHED_PATH . 'includes/class-klarhed-woo.php';
 
 class Klarhed_Plugin {
     public function __construct() {
-        add_action( 'init',                [ $this, 'load_textdomain' ] );
-        add_action( 'wp_enqueue_scripts',  [ $this, 'enqueue_frontend' ] );
+        add_action( 'init',                  [ $this, 'load_textdomain' ] );
+        add_action( 'init',                  [ $this, 'register_sw_rewrite' ] );
+        add_action( 'init',                  [ $this, 'maybe_flush_sw_rewrite' ] );
+        add_action( 'wp_enqueue_scripts',    [ $this, 'enqueue_frontend' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin' ] );
+        add_action( 'template_redirect',     [ $this, 'serve_sw' ] );
+        add_filter( 'query_vars',            [ $this, 'add_query_vars' ] );
         register_activation_hook( __FILE__,   [ $this, 'activate' ] );
         register_deactivation_hook( __FILE__, [ $this, 'deactivate' ] );
 
@@ -50,6 +54,34 @@ class Klarhed_Plugin {
 
     public function load_textdomain() {
         load_plugin_textdomain( 'klarhed', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    }
+
+    public function add_query_vars( $vars ) {
+        $vars[] = 'klarhed_sw';
+        return $vars;
+    }
+
+    public function register_sw_rewrite() {
+        add_rewrite_rule( '^klarhed-sw\.js$', 'index.php?klarhed_sw=1', 'top' );
+    }
+
+    // Flush rewrite rules once per version so the SW rewrite takes effect without reactivation.
+    public function maybe_flush_sw_rewrite() {
+        if ( get_option( 'klarhed_sw_flushed' ) !== KLARHED_VERSION ) {
+            flush_rewrite_rules();
+            update_option( 'klarhed_sw_flushed', KLARHED_VERSION );
+        }
+    }
+
+    public function serve_sw() {
+        if ( ! get_query_var( 'klarhed_sw' ) ) return;
+        $file = KLARHED_PATH . 'assets/sw.js';
+        if ( ! file_exists( $file ) ) { status_header( 404 ); exit; }
+        header( 'Content-Type: application/javascript; charset=utf-8' );
+        header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+        header( 'Service-Worker-Allowed: /' );
+        readfile( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+        exit;
     }
 
     public function enqueue_frontend() {

@@ -57,6 +57,10 @@ export const store = {
     saveAnswers( patch ) {
         const id = state.activeId; if ( ! id ) return;
         setState( { attempts: mergeIntoActive( id, patch ) } );
+        if ( ! localStorage.getItem( 'kh_engaged' ) ) {
+            localStorage.setItem( 'kh_engaged', '1' );
+            window.dispatchEvent( new Event( 'kh-engaged' ) );
+        }
         pendingSync = pendingSync ? merge4( pendingSync, patch ) : patch;
         clearTimeout( syncTimer );
         syncTimer = setTimeout( () => {

@@ -23,17 +23,34 @@ document.querySelectorAll( '#klarhed-root' ).forEach( ( node ) => {
     );
 } );
 
-// ── PWA install prompt ────────────────────────────────────────────────────
+// ── Service worker ─────────────────────────────────────────────────────────
+if ( 'serviceWorker' in navigator ) {
+    navigator.serviceWorker.register( '/klarhed-sw.js', { scope: '/' } ).catch( () => {} );
+}
+
+// ── PWA install prompt — shown after first engagement ─────────────────────
 let deferredPrompt = null;
 
 window.addEventListener( 'beforeinstallprompt', ( e ) => {
     e.preventDefault();
     deferredPrompt = e;
-    // Show after a brief delay so it doesn't appear immediately on first visit
-    setTimeout( showInstallPrompt, 3000 );
+    scheduleInstallPrompt();
 } );
 
+function scheduleInstallPrompt() {
+    if ( localStorage.getItem( 'kh_install_dismissed' ) ) return;
+    if ( ! deferredPrompt ) return;
+    if ( localStorage.getItem( 'kh_engaged' ) ) {
+        // Returning visitor who has already interacted — show after brief delay
+        setTimeout( showInstallPrompt, 2000 );
+    } else {
+        // First visit — wait until user saves their first answer
+        window.addEventListener( 'kh-engaged', () => setTimeout( showInstallPrompt, 1500 ), { once: true } );
+    }
+}
+
 function showInstallPrompt() {
+    if ( ! deferredPrompt ) return;
     if ( localStorage.getItem( 'kh_install_dismissed' ) ) return;
     if ( document.getElementById( 'kh-install-prompt' ) ) return;
 
