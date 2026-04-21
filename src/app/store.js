@@ -53,6 +53,11 @@ export const store = {
         await this.load();
     },
 
+    async rename( id, name ) {
+        await apiFetch( { path: `klarhed/v1/attempts/${ id }`, method: 'PATCH', data: { name } } );
+        setState( { attempts: state.attempts.map( ( a ) => a.id === id ? { ...a, name } : a ) } );
+    },
+
     // Optimistic local update + debounced REST sync (accumulates patches)
     saveAnswers( patch ) {
         const id = state.activeId; if ( ! id ) return;

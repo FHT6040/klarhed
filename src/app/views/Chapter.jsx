@@ -70,6 +70,7 @@ export function Chapter( { course, snapshot, store, go, idx } ) {
                             done={ !! progress[ pKey ] }
                             fields={ fields } baseline={ baseline }
                             finalMeasure={ finalMeasure } baselineGroups={ baselineGroups }
+                            chapters={ chapters }
                             save={ save } onMarkDone={ markDone } onFocusMode={ setFocusMode }
                         />
                     );
@@ -187,7 +188,7 @@ function ChapterDone( { ch, idx, chapters, lessons, go } ) {
 
 // ── Lesson card ──────────────────────────────────────────────────────────
 
-function LessonCard( { ch, idx, les, pKey, done, fields, baseline, finalMeasure, baselineGroups, save, onMarkDone, onFocusMode } ) {
+function LessonCard( { ch, idx, les, pKey, done, fields, baseline, finalMeasure, baselineGroups, chapters, save, onMarkDone, onFocusMode } ) {
     const kind = les.kind || 'read';
     const [ expanded, setExpanded ] = useState( false );
 
@@ -206,7 +207,8 @@ function LessonCard( { ch, idx, les, pKey, done, fields, baseline, finalMeasure,
             <LessonBody
                 ch={ ch } idx={ idx } les={ les } kind={ kind }
                 fields={ fields } baseline={ baseline } finalMeasure={ finalMeasure }
-                baselineGroups={ baselineGroups } save={ save } onFocusMode={ onFocusMode }
+                baselineGroups={ baselineGroups } chapters={ chapters }
+                save={ save } onFocusMode={ onFocusMode }
                 expanded={ expanded } setExpanded={ setExpanded }
             />
         </article>
@@ -215,7 +217,7 @@ function LessonCard( { ch, idx, les, pKey, done, fields, baseline, finalMeasure,
 
 // ── Lesson body — one component per kind ─────────────────────────────────
 
-function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, baselineGroups, save, onFocusMode, expanded, setExpanded } ) {
+function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, baselineGroups, chapters, save, onFocusMode, expanded, setExpanded } ) {
     switch ( kind ) {
         case 'read': {
             const text    = les.body || '';
@@ -270,9 +272,28 @@ function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, basel
                     } ) }
                 </div>
             );
-        case 'commit':
+        case 'commit': {
+            const reflectRefs = ( ch.lessons || [] ).reduce( ( acc, l, li ) => {
+                if ( l.kind !== 'reflect' ) return acc;
+                ( l.prompts || [] ).forEach( ( prompt, pi ) => {
+                    const v = fields[ `${ ch.slug }:reflect:${ li }:${ pi }` ]?.trim();
+                    if ( v ) acc.push( { prompt, answer: v } );
+                } );
+                return acc;
+            }, [] );
             return (
                 <div className="kh-lesson-body">
+                    { reflectRefs.length > 0 && (
+                        <div className="kh-commit-refs">
+                            <p className="kh-eyebrow">Dine refleksioner i dette kapitel</p>
+                            { reflectRefs.map( ( { prompt, answer }, i ) => (
+                                <div key={ i } className="kh-commit-ref-item">
+                                    <p className="kh-commit-ref-q">{ prompt }</p>
+                                    <p className="kh-commit-ref-a">"{ answer }"</p>
+                                </div>
+                            ) ) }
+                        </div>
+                    ) }
                     { [ 'Indsigt', 'Handling', 'Løfte' ].map( ( label, ci ) => {
                         const k = `${ ch.slug }:commit:${ idx }:${ ci }`;
                         return (
@@ -287,6 +308,7 @@ function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, basel
                     } ) }
                 </div>
             );
+        }
         case 'manifest': {
             const k = `${ ch.slug }:manifest:${ idx }`;
             return (
@@ -452,9 +474,42 @@ function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, basel
                 </div>
             );
         }
-        case 'plan90':
+        case 'plan90': {
+            const challenge = fields[ 'welcome:challenge' ]?.trim();
+            const commitRefs = ( chapters || [] ).flatMap( ( c ) =>
+                ( c.lessons || [] ).reduce( ( acc, l, li ) => {
+                    if ( l.kind !== 'commit' ) return acc;
+                    const v = fields[ `${ c.slug }:commit:${ li }:0` ]?.trim();
+                    if ( v ) acc.push( { letter: c.letter, name: c.name, indsigt: v } );
+                    return acc;
+                }, [] )
+            );
             return (
                 <div className="kh-lesson-body">
+                    { ( challenge || commitRefs.length > 0 ) && (
+                        <div className="kh-plan90-refs">
+                            { challenge && (
+                                <div className="kh-plan90-challenge">
+                                    <p className="kh-eyebrow">Din startudfordring</p>
+                                    <p className="kh-plan90-challenge-text">"{ challenge }"</p>
+                                </div>
+                            ) }
+                            { commitRefs.length > 0 && (
+                                <>
+                                    <p className="kh-eyebrow" style={ { marginTop: challenge ? 16 : 0 } }>Dine vigtigste indsigter</p>
+                                    { commitRefs.map( ( { letter, name, indsigt }, i ) => (
+                                        <div key={ i } className="kh-plan90-commit-item">
+                                            <span className="kh-plan90-commit-letter">{ letter }</span>
+                                            <div>
+                                                <p className="kh-plan90-commit-name">{ name }</p>
+                                                <p className="kh-plan90-commit-text">"{ indsigt }"</p>
+                                            </div>
+                                        </div>
+                                    ) ) }
+                                </>
+                            ) }
+                        </div>
+                    ) }
                     { [ 1, 2, 3 ].map( ( n ) => {
                         const k = `${ ch.slug }:plan90:${ idx }:${ n }`;
                         return (
@@ -469,6 +524,7 @@ function LessonBody( { ch, idx, les, kind, fields, baseline, finalMeasure, basel
                     } ) }
                 </div>
             );
+        }
         default:
             return (
                 <div className="kh-lesson-body">

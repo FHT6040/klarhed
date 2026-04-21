@@ -5,6 +5,7 @@ export function Dashboard( { course, snapshot, store, go, user } ) {
     const active      = snapshot.attempts.find( ( a ) => a.id === snapshot.activeId );
     const progress    = active?.progress || {};
     const fields      = active?.fields   || {};
+    const share       = snapshot.share;
     const hasBaseline = Object.keys( active?.baseline || {} ).length > 0;
     const welcomed    = !! fields[ 'welcome:challenge' ];
 
@@ -38,6 +39,8 @@ export function Dashboard( { course, snapshot, store, go, user } ) {
                     <WelcomeCard user={ user } store={ store } />
                 ) }
 
+                <AttemptName active={ active } store={ store } />
+
                 { hasBaseline
                     ? <BaselineSummary groups={ course?.baseline?.groups || [] } baseline={ active.baseline } go={ go } />
                     : <BaselineCTA go={ go } /> }
@@ -60,6 +63,11 @@ export function Dashboard( { course, snapshot, store, go, user } ) {
                         </button>
                     </div>
                 ) }
+
+                { share?.adminAllowed && (
+                    <ShareCard share={ share } store={ store } />
+                ) }
+
             </main>
         </>
     );
@@ -77,6 +85,42 @@ function findNextLesson( chapters, progress ) {
         }
     }
     return null;
+}
+
+// ── Attempt rename ────────────────────────────────────────────────────────
+
+function AttemptName( { active, store } ) {
+    const [ editing, setEditing ] = useState( false );
+    const [ val, setVal ]         = useState( '' );
+
+    if ( ! active ) return null;
+
+    const startEdit = () => { setVal( active.name || '' ); setEditing( true ); };
+    const commit    = () => {
+        setEditing( false );
+        const trimmed = val.trim();
+        if ( trimmed && trimmed !== active.name ) store.rename( active.id, trimmed );
+    };
+
+    return (
+        <div className="kh-attempt-name">
+            { editing ? (
+                <input
+                    className="kh-attempt-name-input"
+                    value={ val }
+                    autoFocus
+                    onChange={ ( e ) => setVal( e.target.value ) }
+                    onBlur={ commit }
+                    onKeyDown={ ( e ) => { if ( e.key === 'Enter' ) commit(); if ( e.key === 'Escape' ) setEditing( false ); } }
+                />
+            ) : (
+                <>
+                    <span className="kh-attempt-name-label">{ active.name || 'Mit forløb' }</span>
+                    <button className="kh-attempt-name-edit" onClick={ startEdit } title="Omdøb forløbet">✏</button>
+                </>
+            ) }
+        </div>
+    );
 }
 
 // ── Welcome card — shows once until answered ──────────────────────────────
@@ -123,7 +167,7 @@ function WelcomeCard( { user, store } ) {
     );
 }
 
-// ── Baseline CTA — re-framed ──────────────────────────────────────────────
+// ── Baseline CTA ──────────────────────────────────────────────────────────
 
 function BaselineCTA( { go } ) {
     return (
@@ -236,5 +280,50 @@ function ChapterCard( { ch, idx, progress, go } ) {
                 </div>
             </div>
         </button>
+    );
+}
+
+// ── Coach-share card ──────────────────────────────────────────────────────
+
+function ShareCard( { share, store } ) {
+    const [ busy, setBusy ] = useState( false );
+
+    const toggle = async () => {
+        setBusy( true );
+        await store.updateShare( { enabled: ! share.enabled } ).catch( () => {} );
+        setBusy( false );
+    };
+
+    const copyLink = () => {
+        if ( share.publicUrl ) navigator.clipboard?.writeText( share.publicUrl ).catch( () => {} );
+    };
+
+    return (
+        <div className="kh-share-card">
+            <p className="kh-eyebrow">Coach-adgang</p>
+            <div className="kh-share-row">
+                <div>
+                    <h3 className="kh-h3">Del med din coach</h3>
+                    <p className="kh-muted">Din coach kan se dine svar og fremgang — du bevarer fuld kontrol.</p>
+                </div>
+                <button
+                    className={ `kh-toggle${ share.enabled ? ' is-on' : '' }` }
+                    onClick={ toggle }
+                    disabled={ busy }
+                    aria-pressed={ share.enabled }
+                >
+                    <span className="kh-toggle-knob" />
+                </button>
+            </div>
+            { share.enabled && share.publicUrl && (
+                <div className="kh-share-link">
+                    <p className="kh-muted" style={ { marginBottom: 8 } }>Del dette link med din coach:</p>
+                    <div className="kh-share-link-row">
+                        <input className="kh-share-url" readOnly value={ share.publicUrl } onClick={ ( e ) => e.target.select() } />
+                        <button className="kh-btn kh-btn--ghost" onClick={ copyLink }>Kopier</button>
+                    </div>
+                </div>
+            ) }
+        </div>
     );
 }
