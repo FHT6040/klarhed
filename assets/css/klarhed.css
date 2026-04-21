@@ -71,7 +71,7 @@
 
 /* Chapter grid */
 .kh-root .kh-chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.kh-root .kh-chapter-card { background: var(--kh-white); border: 1px solid var(--kh-line); border-radius: var(--kh-r-lg); padding: 22px; text-align: left; cursor: pointer; display: flex; gap: 16px; transition: border-color .15s, transform .12s, box-shadow .15s; font-family: inherit; color: inherit; overflow: hidden; }
+.kh-root .kh-chapter-card { background: var(--kh-white); border: 1px solid var(--kh-line); border-radius: var(--kh-r-lg); padding: 22px; text-align: left; cursor: pointer; display: flex; gap: 16px; transition: border-color .15s, transform .12s, box-shadow .15s; font-family: inherit; color: inherit; overflow: hidden; white-space: normal; }
 .kh-root .kh-chapter-card:hover { border-color: var(--kh-teal); transform: translateY(-3px); box-shadow: var(--kh-shadow-md); }
 .kh-root .kh-chapter-card.is-complete { border-color: var(--kh-lime); background: var(--kh-lime-wash); }
 .kh-root .kh-chapter-letter { font-family: var(--kh-font-display); font-size: 52px; line-height: 1; color: var(--kh-teal); flex: 0 0 64px; }
